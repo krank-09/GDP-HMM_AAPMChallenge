@@ -84,6 +84,25 @@ class MyDataset(Dataset):
         return len(self.data_list)
     
     def __getitem__(self, index):
+        # Some .npz files in the GDP-HMM train_01/train_02 archives can be
+        # corrupt (observed: zlib "invalid block type" mid-decompress). One
+        # bad file killed a full training run mid-epoch-1; guard against it by
+        # falling through to the next index (wrapping) on any failure, bounded
+        # so a genuinely broken dataset still raises rather than looping.
+        n = len(self.data_list)
+        last_err = None
+        for offset in range(min(n, 25)):
+            try:
+                return self._getitem(index + offset if offset == 0 else (index + offset) % n)
+            except Exception as e:  # noqa: BLE001 -- deliberately broad
+                last_err = e
+                bad = self.data_list[(index + offset) % n]
+                print(f"[dataset skip] {bad}: {type(e).__name__}: {e}", flush=True)
+        raise RuntimeError(f"25 consecutive dataset items failed near index {index}; "
+                           f"last error: {last_err}")
+
+    def _getitem(self, index):
+        index = index % len(self.data_list)
         data_path = self.data_list[index]
         ID = self.data_list[index].split('/')[-1].replace('.npz', '')
         PatientID = ID.split('+')[0]
@@ -132,7 +151,12 @@ class MyDataset(Dataset):
         KEYS = list(In_dict.keys())
         for key in In_dict.keys(): 
             if isinstance(In_dict[key], np.ndarray) and len(In_dict[key].shape) == 3:
-                In_dict[key] = torch.from_numpy(In_dict[key].astype('float'))[None]
+                # float32, not float64 ('float' defaults to double precision):
+                # every 3D array in the npz (image + dose + ~30-45 structure
+                # masks) gets converted here BEFORE cropping to in_size/out_size,
+                # so at native resolution this was needlessly doubling peak
+                # memory (observed ~18GB on an 8GB machine for a single sample).
+                In_dict[key] = torch.from_numpy(In_dict[key].astype('float32'))[None]
             else:
                 KEYS.remove(key)
         

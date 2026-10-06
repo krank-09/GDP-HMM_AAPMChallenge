@@ -1,0 +1,16 @@
+{
+  "model": "mednext",
+  "input_resolution": [
+    64,
+    96,
+    112
+  ],
+  "model_id": "S",
+  "eval_set": "validation (no locally-available files tagged dev_split=='test')",
+  "n_eval_patients": 75,
+  "eval_l1_loss_mean": 0.1473854660987854,
+  "eval_l1_loss_std": 0.056817460839122036,
+  "best_val_loss": 0.1473854660987854,
+  "epochs_completed": 26,
+  "stopped_for_deadline": true
+}

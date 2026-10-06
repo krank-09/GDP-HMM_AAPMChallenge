@@ -1,0 +1,37 @@
+loader_params:
+
+    'train_bs': 1
+    'val_bs': 1
+    'csv_root': 'meta_files/meta_data_local_smoketest_small.csv'
+    'scale_dose_dict': 'meta_files/PTV_DICT.json'
+    'pat_obj_dict': 'meta_files/Pat_Obj_DICT.json'
+    'num_workers': 0
+
+    'down_HU': -1000
+    'up_HU': 1000
+    'denom_norm_HU': 500
+
+    'in_size': [96, 128, 144]
+    'out_size': [96, 128, 144]
+
+    'norm_oar': True
+    'CatStructures': False
+
+    'dose_div_factor': 10
+
+
+model_params:
+    num_input_channels: 8
+    out_channels: 1
+    model_id: 'S'
+    kernel_size: 3
+    deep_supervision: False
+
+save_model_root: 'runs/local_smoketest'
+lr: 0.0001
+
+num_epochs: 2
+
+act_sig: True
+
+scale_out: 7.5

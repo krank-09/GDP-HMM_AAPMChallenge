@@ -1,5 +1,25 @@
 # GDP-HMM Challenge at AAPM 2025
+
 [![AAPM website](https://img.shields.io/badge/AAPM%20website-50d13d)](https://www.aapm.org/GrandChallenge/GDP-HMM/) [![Challenge website](https://img.shields.io/badge/Challenge%20website-blue)](https://qtim-challenges.southcentralus.cloudapp.azure.com/competitions/38/) [![Numpy Data](https://img.shields.io/badge/huggingface-Numpy%20data-green)](https://huggingface.co/datasets/Jungle15/GDP-HMM_Challenge/)  [![DICOM RAW Data](https://img.shields.io/badge/huggingface-DICOM%20data-yellow)](https://huggingface.co/datasets/Jungle15/Radiotherapy_HaN_Lung_AIRTP/) [![PreTrained Baseline](https://img.shields.io/badge/huggingface-PreTrained%20baseline-teal)](https://huggingface.co/Jungle15/GDP-HMM_baseline/) [![arXiv](https://img.shields.io/badge/preprint-2501.11803-orange)](https://arxiv.org/abs/2501.11803/)
+
+> ## About this fork
+>
+> This is a fork of the official **GDP-HMM AAPM 2025 Challenge** repository by Riqiang Gao et al. Everything below this box is the organisers' original README. It was used to train the challenge's **MedNeXt baseline** as the third model in a small head-and-neck dose-prediction study, alongside [dvhnet](https://github.com/krank-09/dvhnet) and [dosenet3d](https://github.com/krank-09/dosenet3d). Overview: [rt-dose-prediction](https://github.com/krank-09/rt-dose-prediction).
+>
+> **Changes in this fork** (everything else is upstream, unchanged):
+> - `train.py`
+>   - One `INPUT_RESOLUTION` constant (64×96×112), so the model fits a free 16 GB T4 GPU. Upstream uses 96×128×144.
+>   - `--resume` restores model, optimizer **and** LR-scheduler state. A bug fix: building the cosine scheduler with `last_epoch=num_epochs` made every resumed run jump back to a high learning rate.
+>   - Adds `--epochs_override` and `--deadline_epoch_seconds` (stop cleanly before a cloud session ends), periodic checkpoints, best-checkpoint final evaluation, and a loss-curve plot.
+> - `data_loader.py`
+>   - Skips corrupt `.npz` files instead of crashing mid-epoch. Some archive files fail to decompress.
+>   - Converts arrays to float32 instead of float64, which halves peak memory per sample.
+> - `config_files/config_colab_full.yaml`, `config_local_smoketest.yaml`: configs for a Colab/Kaggle GPU run and a tiny CPU smoke test.
+> - `results/mednext_kaggle_2026-09-13/`: history, loss curve and final evaluation (no weights).
+>
+> **Result:** validation L1 loss **0.147 ± 0.057** after 68 epochs over three resumed Kaggle sessions (0.163 → 0.148 → 0.147). This is on the 75-patient validation set, which also chose the checkpoint, so it isn't a held-out test score. It also isn't comparable to the official baseline's numbers, which use full resolution and the full head-and-neck + lung cohort.
+>
+> **Credit:** all original code, data conventions and the MedNeXt integration are the work of the challenge organisers (MIT licence, see `LICENSE`). MedNeXt: Roy et al., MICCAI 2023. Data: GDP-HMM (CC BY-NC-SA 4.0). Please cite their papers, listed in the Citation section below.
 
 
 <p align="center">
